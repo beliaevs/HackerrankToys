@@ -6,6 +6,43 @@
 #include <set>
 using namespace std;
 
+template<typename F>
+int floyd(F f, int x_0, int N)
+{
+    int tortoise = f(x_0);
+    int hare = f(tortoise);
+
+    int i = 0;
+    while(tortoise != hare && i < N)
+    {
+        tortoise = f(tortoise);
+        hare = f(f(hare));
+        ++i;
+    }
+    if( i == N)
+        return N;
+
+    int mu = 0;
+    tortoise = x_0;
+    while(tortoise != hare && mu < N)
+    {
+        tortoise = f(tortoise);
+        hare = f(hare);
+        mu += 1;
+    }
+    if(mu == N)
+        return N;
+
+    int lam = 1;
+    hare = f(tortoise);
+    while(tortoise != hare && lam < N)
+    {
+        hare = f(hare);
+        lam += 1;
+    }
+    return min(mu + lam, N);
+}
+
 
 int main() {
     /* Enter your code here. Read input from STDIN. Print output to STDOUT */ 
@@ -13,25 +50,12 @@ int main() {
     long long N, S, P, Q;
     cin >> N >> S >> P >> Q;
 
-    set<int> s;
+    auto step = [S, P, Q](int n) -> int {
+        constexpr long long t_31 = 2147483648LL;
+        return ((long long)(n) * P + Q) % t_31;
+    };
+
     
-    long long cur = S;
-    s.insert(cur);
-    constexpr long long t_31 = 2147483648LL;
-    for(int i = 1; i < N; ++i)
-    {
-        cur = cur * P + Q;
-        cur = cur % t_31; 
-        if(s.find(cur) == s.end())
-        {
-            s.insert(cur);
-        }
-        else
-        {
-            std::cout << s.size() << "\n";
-            return 0;
-        }
-    }
-    std::cout << s.size() << "\n";
+    std::cout << floyd(step, S, N) << "\n";
     return 0;
 }
